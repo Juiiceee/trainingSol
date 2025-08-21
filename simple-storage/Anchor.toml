@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-simple_storage = "5cUi8qmcr6wtwyXCBskhSc8QnqDvtdLhct3W5hDay7ap"
+simple_storage = "9zcE5bJ6KXPRDuwmQmnZgpGcD25zWEXF3CRto2z1z9FA"
 
 [registry]
 url = "https://api.apr.dev"
