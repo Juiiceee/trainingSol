@@ -23,6 +23,36 @@ pub mod vault {
 		transfer(cpi_context, amount)?;
 		Ok(())
 	}
+
+	pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+		require!(ctx.accounts.signer.key() == ctx.accounts.vault.owner, ErrorCode::Unauthorized);
+
+		require!(ctx.accounts.vault.amount >= amount, ErrorCode::InsufficientFunds);
+
+		ctx.accounts.vault.amount = ctx.accounts.vault.amount.checked_sub(amount).unwrap();
+
+		let vault_account_info = ctx.accounts.vault.to_account_info();
+		let signer_account_info = ctx.accounts.signer.to_account_info();
+
+		let rent = Rent::get()?;
+		let min_rent = rent.minimum_balance(vault_account_info.data_len());
+
+		require!(
+			vault_account_info.lamports().checked_sub(amount).unwrap() >= min_rent,
+			ErrorCode::InsufficientFundsForRent
+		);
+
+		**vault_account_info.try_borrow_mut_lamports()? = vault_account_info
+			.lamports()
+			.checked_sub(amount)
+			.unwrap();
+		
+		**signer_account_info.try_borrow_mut_lamports()? = signer_account_info
+			.lamports()
+			.checked_add(amount)
+			.unwrap();
+		Ok(())
+	}
 }
 
 #[derive(Accounts)]
@@ -43,9 +73,28 @@ pub struct Deposit<'info> {
 	pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct Withdraw<'info> {
+	#[account(mut)]
+	pub vault: Account<'info, Vault>,
+	#[account(mut)]
+	pub signer: Signer<'info>,
+	pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct Vault {
 	pub owner: Pubkey,
 	pub amount: u64,
 	pub bump: u8,
+}
+
+#[error_code]
+pub enum ErrorCode {
+	#[msg("Unauthorized access")]
+	Unauthorized,
+	#[msg("Insufficient funds")]
+	InsufficientFunds,
+	#[msg("Insufficient funds for rent")]
+	InsufficientFundsForRent,
 }
