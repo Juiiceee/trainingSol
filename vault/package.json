@@ -2,10 +2,12 @@
   "license": "ISC",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+	"fmt": "prettier programs/**/*.rs tests/**/*.ts -w"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.31.1"
+    "@coral-xyz/anchor": "^0.31.1",
+    "prettier-plugin-rust": "^0.1.9"
   },
   "devDependencies": {
     "chai": "^4.3.4",
