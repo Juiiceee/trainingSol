@@ -24,6 +24,25 @@ pub mod vote {
 		msg!("Poll created successfully");
 		Ok(())
 	}
+
+	pub fn vote(ctx: Context<Vote>, vote_for: bool) -> Result<()> {
+		let vote_account = &mut ctx.accounts.vote_account;
+		
+		// Check if this account was just created (voter will be default/empty) or already exists
+		if vote_account.voter != Pubkey::default() {
+			return Err(ErrorCode::AlreadyVoted.into());
+		}
+		
+		vote_account.voter = ctx.accounts.signer.key();
+		let poll = &mut ctx.accounts.poll;
+		if vote_for {
+			poll.poll_for += 1;
+		} else {
+			poll.poll_against += 1;
+		}
+		msg!("Voted successfully");
+		Ok(())
+	}
 }
 
 #[derive(Accounts)]
@@ -34,6 +53,23 @@ pub struct CreatePoll<'info> {
 	#[account(mut)]
 	pub signer: Signer<'info>,
 	pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Vote<'info> {
+	#[account(mut)]
+	pub poll: Account<'info, Poll>,
+	#[account(init_if_needed, payer = signer, space = 8 + VoteAccount::INIT_SPACE, seeds = [b"vote", poll.key().as_ref(), signer.key().as_ref()], bump)]
+	pub vote_account: Account<'info, VoteAccount>,
+	#[account(mut)]
+	pub signer: Signer<'info>,
+	pub system_program: Program<'info, System>,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct VoteAccount {
+	pub voter: Pubkey,
 }
 
 #[account]
@@ -56,4 +92,6 @@ pub enum ErrorCode {
 	InvalidPollName,
 	#[msg("Poll description is too long")]
 	InvalidPollDescription,
+	#[msg("Already voted")]
+	AlreadyVoted,
 }
