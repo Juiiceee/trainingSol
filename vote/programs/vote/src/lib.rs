@@ -29,7 +29,7 @@ pub mod vote {
 #[derive(Accounts)]
 #[instruction(poll_name: String)]
 pub struct CreatePoll<'info> {
-	#[account(init, payer = signer, space = 8 + Poll::INIT_SPACE, seeds = [b"poll", signer.key().as_ref(), poll_name.as_bytes()], bump)]
+	#[account(init, payer = signer, space = 8 + Poll::INIT_SPACE, seeds = [b"poll", poll_name.as_bytes()], bump)]
 	pub poll: Account<'info, Poll>,
 	#[account(mut)]
 	pub signer: Signer<'info>,

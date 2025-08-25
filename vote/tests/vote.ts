@@ -16,15 +16,15 @@ describe("vote", () => {
 	const badName = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	const badDescription = "qqqaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa88888888888888888888888888888888888888888888888888888888888888888888888888888888"
 	
-	const getPollAccount = (name: string, wallet: anchor.web3.PublicKey) => {
+	const getPollAccount = (name: string) => {
 		return anchor.web3.PublicKey.findProgramAddressSync(
-			[Buffer.from("poll"), wallet.toBuffer(), Buffer.from(name)],
+			[Buffer.from("poll"), Buffer.from(name)],
 			program.programId
 		);
 	};
 
 	const [pollAccount] = anchor.web3.PublicKey.findProgramAddressSync(
-		[Buffer.from("poll"), provider.wallet.publicKey.toBuffer(), Buffer.from(firstName)],
+		[Buffer.from("poll"), Buffer.from(firstName)],
 		program.programId
 	);
 
